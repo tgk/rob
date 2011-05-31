@@ -83,8 +83,8 @@
 (defroutes handler
   (GET "/" [] (slurp "index.html"))
   (GET "/js/core.js" [] (slurp "js/core.js"))
-  (GET "/game-state/" [] (json-response @game-state))
-  (POST "/player1/" [player-id card-number] (json-response (play-card-on-game-state player-id card-number))))
+  (GET "/game-state" [] (json-response @game-state))
+  (POST "/play-card" [player-id card-number] (json-response (play-card-on-game-state player-id card-number))))
 
 (def app
      (-> handler
