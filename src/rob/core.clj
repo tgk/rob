@@ -3,7 +3,8 @@
   (:use ring.middleware.json-params)
   (:require [clj-json.core :as json])
   (:use ring.adapter.jetty)
-  (:import java.util.Random)
+  (:import java.util.Random
+	   [java.util.concurrent Executors TimeUnit])
   (:use clojure.contrib.generic.functor))
 
 ; Game state and changer
@@ -72,7 +73,13 @@
 	    :queue (cons (assoc top-card :time (dec top-card-time)) (rest queue))))))))
     
 (defn advance-time [current-game-state]
-  (assoc current-game-state :players (fmap advance-time-for-player (:players current-game-state))))
+  (assoc current-game-state
+    :players (fmap advance-time-for-player (:players current-game-state))
+    :last-updated (System/currentTimeMillis)))
+
+(def thread-pool (Executors/newScheduledThreadPool 4))
+(def scheduler
+     (.scheduleAtFixedRate thread-pool (fn [] (swap! game-state advance-time)) 0 200 TimeUnit/MILLISECONDS))
 
 ; Web-server magic
 
@@ -89,7 +96,6 @@
   (GET "/" [] (slurp "index.html"))
   (GET "/js/core.js" [] (slurp "js/core.js"))
   (GET "/game-state" [] (json-response @game-state))
-  (GET "/advance-time" [] (swap! game-state advance-time))
   (POST "/play-card" [player-id card-number] (json-response (play-card-on-game-state player-id card-number))))
 
 (def app
