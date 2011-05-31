@@ -44,28 +44,33 @@
 	  :east (assoc player-state :x (+ (:x player-state) steps))
 	  :west (assoc player-state :x (- (:x player-state) steps)))))
 
+(def clockwise-to {:north :east, :east :south, :south :west, :west :north})
+(defn turn-clockwise [player-state]
+  (assoc player-state :direction (clockwise-to (:direction player-state))))
+(defn turn [times]
+  (fn [player-state] (nth (iterate turn-clockwise player-state) times)))
+
 (def player-actions
      {:forward (move 1)
       :backward (move -1)
-      :turn-left identity
-      :turn-right identity
+      :turn-left (turn 3)
+      :turn-right (turn 1)
       :fast-forward (move 2)
       :fire identity})
 
-(comment defn perform-card-action [current-game-state player-id]
-  (let [player-state (get-in current-game-state [:players player-id])
-	card (nth (:deck player-state) card-number)]
-    (assoc-in current-game-state [:players player-id] ((player-actions (:type card)) player-state))))
-
 (defn advance-time-for-player [player-state]
-  (let [queue (:queue player-state)
-	top-card (first queue)
-	top-card-time (:time top-card)]
-    (if (= 0 top-card-time)
-      ((player-actions (:type top-card)) player-state)
-      (assoc player-state
-	:queue (cons (assoc top-card :time (dec top-card-time)) (rest queue))))))
-
+  (let [queue (:queue player-state)]
+    (if (empty? queue)
+      player-state
+      (let [top-card (first queue)
+	    top-card-time (:time top-card)]
+	(if (= 0 top-card-time)
+	  (assoc
+	      ((player-actions (:type top-card)) player-state)
+	    :queue (rest queue))
+	  (assoc player-state
+	    :queue (cons (assoc top-card :time (dec top-card-time)) (rest queue))))))))
+    
 (defn advance-time [current-game-state]
   (assoc current-game-state :players (fmap advance-time-for-player (:players current-game-state))))
 
@@ -84,6 +89,7 @@
   (GET "/" [] (slurp "index.html"))
   (GET "/js/core.js" [] (slurp "js/core.js"))
   (GET "/game-state" [] (json-response @game-state))
+  (GET "/advance-time" [] (swap! game-state advance-time))
   (POST "/play-card" [player-id card-number] (json-response (play-card-on-game-state player-id card-number))))
 
 (def app
