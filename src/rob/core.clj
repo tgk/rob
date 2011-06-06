@@ -124,8 +124,8 @@
   (GET "/js/core.js" [] (slurp "js/core.js"))
   (GET "/restart" [] (reset! game-state (random-game-state)))
   (GET "/add-player" []
-       (redirect (format "/game/%s" (add-uuid-player-to-game-state))))
-  (GET "/game/:player-id" [] (slurp "index.html"))
+       (redirect (format "/game/%s/" (add-uuid-player-to-game-state))))
+  (GET "/game/:player-id/" [] (slurp "index.html"))
   (GET "/game/:player-id/game-state" [player-id]
        (json-response (tailored-game-state @game-state player-id)))
   (POST "/game/:player-id/:card-number" [player-id card-number]
