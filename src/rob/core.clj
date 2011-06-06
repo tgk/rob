@@ -38,7 +38,7 @@
   (let [player-state (get-in current-game-state [:players player-id])
 	card (nth (:deck player-state) card-number)
 	new-deck (switch-nth card-number (:deck player-state) (sample cards))
-	new-queue (conj (:queue player-state) card)]
+	new-queue (cons (:queue player-state) card)]
     (assoc-in
      current-game-state [:players player-id]
      (assoc player-state
@@ -132,8 +132,8 @@
   (GET "/game/:player-id/game-state" [player-id]
        (json-response (tailored-game-state @game-state player-id)))
   (POST "/game/:player-id/play-card/:card-number" [player-id card-number]
-	(json-response (play-card-on-game-state player-id
-						(Integer/parseInt card-number)))))
+	(json-response
+	 (play-card-on-game-state player-id (Integer/parseInt card-number)))))
 
 (def app
      (-> handler
