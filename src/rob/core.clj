@@ -3,7 +3,7 @@
   (:use ring.middleware.json-params)
   (:require [clj-json.core :as json])
   (:use ring.adapter.jetty)
-  (:import java.util.Random
+  (:import [java.util Random UUID]
 	   [java.util.concurrent Executors TimeUnit])
   (:use clojure.contrib.generic.functor))
 
@@ -17,22 +17,29 @@
 (defn initial-player [x y]
   {:x x, :y y, :direction :north, :queue [], :deck (random-deck)})
 (defn random-game-state []
-  {:players {0 (initial-player 0 3), 1 (initial-player 0 5)}
+  {:players {}
 	    :goal [6 4]})
+
+(defn add-player []
+  (let [uuid (.toString (UUID/randomUUID))]
+    (swap! game-state assoc-in [:players uuid] (initial-player 0 0))
+    {:player-id uuid}))
+
 (def game-state (atom (random-game-state)))
 
 ; Playing cards
 
-(defn remove-nth [n coll] (concat (take n coll) (drop (inc n) coll)))
+(defn switch-nth [n coll val]
+  (concat (take n coll) [val] (drop (inc n) coll))) 
 (defn play-card [current-game-state player-id card-number]
   (let [player-state (get-in current-game-state [:players player-id])
 	card (nth (:deck player-state) card-number)
-	remaining-cards (remove-nth card-number (:deck player-state))
+	new-deck (switch-nth card-number (:deck player-state) (sample cards))
 	new-queue (conj (:queue player-state) card)]
     (assoc-in
      current-game-state [:players player-id]
      (assoc player-state
-       :deck (conj remaining-cards (sample cards))
+       :deck new-deck
        :queue new-queue))))
 
 ; Advancing time
@@ -95,8 +102,11 @@
 (defroutes handler
   (GET "/" [] (slurp "index.html"))
   (GET "/js/core.js" [] (slurp "js/core.js"))
+  (GET "/restart" [] (reset! game-state (random-game-state)))
+  (GET "/add-player" [] (json-response (add-player)))
   (GET "/game-state" [] (json-response @game-state))
-  (POST "/play-card" [player-id card-number] (json-response (play-card-on-game-state player-id card-number))))
+  (POST "/play-card" [player-id card-number]
+	(json-response (play-card-on-game-state player-id card-number))))
 
 (def app
      (-> handler
