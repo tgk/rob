@@ -9,6 +9,7 @@ $.fn.addPlayer = (data) ->
 			bottom: SZ * data.y
 			left: SZ * data.x
 		.appendTo(@)
+	@
 
 main = () ->
 	$.get '/game-state', (state) ->

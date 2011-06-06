@@ -16,10 +16,11 @@
   };
   whoami = 0;
   $.fn.addPlayer = function(data) {
-    return $('<div class="player"><div style="-webkit-transform: rotate(' + angle[data.direction] + 'deg); ">&uarr;</div></div>').css({
+    $('<div class="player"><div style="-webkit-transform: rotate(' + angle[data.direction] + 'deg); ">&uarr;</div></div>').css({
       bottom: SZ * data.y,
       left: SZ * data.x
     }).appendTo(this);
+    return this;
   };
   main = function() {
     return $.get('/game-state', function(state) {
