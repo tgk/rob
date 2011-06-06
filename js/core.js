@@ -1,5 +1,5 @@
 (function() {
-  var SZ, angle, labels, main, whoami;
+  var SZ, angle, labels, main;
   SZ = 20;
   angle = {
     north: 0,
@@ -12,9 +12,9 @@
     "turn-left": "&#8634",
     "turn-right": "&#8634",
     forward: "&uarr;",
-    backward: "&darr;"
+    backward: "&darr;",
+    "fast-forward": "&#8648"
   };
-  whoami = 0;
   $.fn.addPlayer = function(data) {
     $('<div class="player"><div style="-webkit-transform: rotate(' + angle[data.direction] + 'deg); ">&uarr;</div></div>').css({
       bottom: SZ * data.y,
@@ -23,30 +23,28 @@
     return this;
   };
   main = function() {
-    return $.get('/game-state', function(state) {
-      var actions;
-      $('.board').empty().addPlayer(state.players[0]).addPlayer(state.players[1]);
+    return $.get('game-state', function(state) {
+      var actions, board, queue;
+      board = $('.board').empty().addPlayer(state.me);
+      $(state.others).each(function() {
+        return board.addPlayer(this);
+      });
       actions = $('.actions').empty();
-      return $(state.players[whoami].deck).each(function(i) {
-        return $('<li/>').html(labels[this.type] || this.type).data('index', i).appendTo(actions);
+      $(state.me.deck).each(function(i) {
+        return $('<li/>').html(labels[this.type] || this.type).append("<span class='badge'>" + this.time + "</span>").data('index', i).appendTo(actions);
+      });
+      queue = $('.queue').empty();
+      return $(state.me.queue).each(function() {
+        return $('<li/>').html(labels[this.type] || this.type).append("<span class='badge'>" + this.time + "</span>").appendTo(queue);
       });
     });
   };
-  $(function() {
-    console.debug("??");
+  jQuery(function() {
     $('.actions li').live('mousedown', function(ev) {
-      var d, i, settings;
+      var i;
       i = $(this).data('index');
-      d = '{"player-id": ' + whoami + ', "card-number": ' + i + '}';
-      settings = {
-        url: '/play-card',
-        type: "post",
-        contentType: 'application/json',
-        data: d
-      };
-      console.debug(settings);
-      return $.ajax(settings);
+      return $.post("play-card/" + i);
     });
-    return setInterval(main, 50);
+    return setInterval(main, 100);
   });
 }).call(this);

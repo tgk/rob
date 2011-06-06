@@ -17,22 +17,38 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 .board {
 	position: relative;
+	display: inline-block;
 	width:500px; 
 	height:500px; 
 	background-color: #bada55;
 	margin: 10px;
+	vertical-align: top;
 }
 
-.actions li {
-	display: inline-block;	
+.queue{
+	display: inline-block;
+	vertical-align: top;
+	margin: 10px;
+}
+
+.queue li {
+	display: block;	
+	margin-bottom: 5px;
+}
+
+li {
 	margin-left: 10px;
 	width: 40px;
 	height: 40px;
 	line-height: 40px;
 	border: 1px solid #ccc;
 	text-align: center;
-	cursor: pointer;
 	font-size: 20px;
+}
+
+.actions li{
+	display: inline-block;	
+	cursor: pointer;
 }
 
 .actions li:hover {
@@ -42,18 +58,25 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 ul, li {
 	-webkit-user-select: none;
 }
+
+.badge {
+	position: absolute;
+	font-size: 10px;
+	background-color: red;
+	line-height: 10px;
+}
 		</style>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-		<script type="text/javascript" src="js/core.js"></script>
+		<script type="text/javascript" src="/js/core.js"></script>
 	</head>
 	<body>
-		rob
+		<div>rob</div>
 		<div class="board"></div>
+		<ul class="queue">
+			<li>123</li>
+			<li>456</li>
+		</ul>
 		<ul class="actions">
-			<li>&#8634</li>
-			<li>&#8635</li>
-			<li>&#8631</li>
-			<li>&#8593</li>
 		</ul>
 	</body>
 </html>

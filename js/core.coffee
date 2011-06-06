@@ -1,7 +1,6 @@
 SZ = 20
 angle = north: 0, east: 90, south: 180, west: 270
-labels = fire: "!", "turn-left": "&#8634", "turn-right": "&#8634", forward: "&uarr;", backward: "&darr;"
-whoami = 0
+labels = fire: "!", "turn-left": "&#8634", "turn-right": "&#8634", forward: "&uarr;", backward: "&darr;", "fast-forward": "&#8648"
 
 $.fn.addPlayer = (data) ->
 	$('<div class="player"><div style="-webkit-transform: rotate('+angle[data.direction]+'deg); ">&uarr;</div></div>')
@@ -9,30 +8,27 @@ $.fn.addPlayer = (data) ->
 			bottom: SZ * data.y
 			left: SZ * data.x
 		.appendTo(@)
-	@
+	return @
 
 main = () ->
-	$.get '/game-state', (state) ->
-		$('.board').empty()
-			.addPlayer(state.players[0])
-			.addPlayer(state.players[1])
-		
+	$.get 'game-state', (state) ->
+		board = $('.board').empty().addPlayer(state.me)
+		$(state.others).each -> board.addPlayer(@)
 		actions = $('.actions').empty()
-		$(state.players[whoami].deck).each (i) ->
+		$(state.me.deck).each (i) ->
 			$('<li/>').html(labels[@type] || @type)
+				.append("<span class='badge'>#{@time}</span>")
 				.data('index', i)
 				.appendTo(actions)
+		queue = $('.queue').empty()
+		$(state.me.queue).each ->
+			$('<li/>').html(labels[@type] || @type)
+				.append("<span class='badge'>#{@time}</span>")
+				.appendTo(queue)
 
-$ ->
-	console.debug("??")
+jQuery ->
 	$('.actions li').live 'mousedown', (ev) ->
 		i = $(@).data('index')
-		d = '{"player-id": ' + whoami + ', "card-number": ' + i + '}'
-		settings =
-			url: '/play-card'
-			type: "post"
-			contentType: 'application/json'
-			data: d
-		console.debug settings
-		$.ajax settings
-	setInterval main, 50
+		$.post("play-card/#{i}")
+	setInterval main, 100
+
