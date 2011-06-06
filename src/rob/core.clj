@@ -20,12 +20,12 @@
   {:players {}
 	    :goal [6 4]})
 
+(def game-state (atom (random-game-state)))
+
 (defn add-player []
   (let [uuid (.toString (UUID/randomUUID))]
     (swap! game-state assoc-in [:players uuid] (initial-player 0 0))
     {:player-id uuid}))
-
-(def game-state (atom (random-game-state)))
 
 ; Playing cards
 

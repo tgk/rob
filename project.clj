@@ -6,4 +6,5 @@
 		 [ring-json-params "0.1.0"]
 		 [compojure "0.6.3"]
 		 [clj-json "0.3.2"]]
-  :dev-dependencies [[swank-clojure "1.3.0-SNAPSHOT"]])
+  :dev-dependencies [[swank-clojure "1.3.0-SNAPSHOT"]]
+  :main rob.core)
