@@ -131,7 +131,7 @@
   (GET "/game/:player-id" [] (slurp "index.html"))
   (GET "/game/:player-id/game-state" [player-id]
        (json-response (tailored-game-state @game-state player-id)))
-  (POST "/game/:player-id/:card-number" [player-id card-number]
+  (POST "/game/:player-id/play-card/:card-number" [player-id card-number]
        (json-response (play-card-on-game-state player-id card-number))))
 
 (def app
