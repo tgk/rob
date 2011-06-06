@@ -38,7 +38,7 @@
   (let [player-state (get-in current-game-state [:players player-id])
 	card (nth (:deck player-state) card-number)
 	new-deck (switch-nth card-number (:deck player-state) (sample cards))
-	new-queue (cons (:queue player-state) card)]
+	new-queue (concat (:queue player-state) [card])]
     (assoc-in
      current-game-state [:players player-id]
      (assoc player-state
@@ -96,7 +96,7 @@
       :last-updated (System/currentTimeMillis))))
 
 (def thread-pool (Executors/newScheduledThreadPool 4))
-(defonce scheduler
+(def scheduler
   (.scheduleAtFixedRate
    thread-pool
    (fn [] (swap! game-state advance-time))
