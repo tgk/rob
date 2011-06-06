@@ -85,20 +85,23 @@
 (defn increment-card-time [card] (assoc card :time (inc (:time card))))
 (defn increment-deck-time [player]
   (assoc player :deck
-	 (fmap increment-card-time (:deck player))))
+	 (map increment-card-time (:deck player))))
     
 (defn advance-time [current-game-state]
   (let [players (:players current-game-state)
 	players (fmap advance-time-for-player players)
-	;players (fmap increment-deck-time players)
-	]
+	players (fmap increment-deck-time players)]
     (assoc current-game-state
       :players players
       :last-updated (System/currentTimeMillis))))
 
 (def thread-pool (Executors/newScheduledThreadPool 4))
-(def scheduler
-     (.scheduleAtFixedRate thread-pool (fn [] (swap! game-state advance-time)) 0 200 TimeUnit/MILLISECONDS))
+(defonce scheduler
+  (.scheduleAtFixedRate
+   thread-pool
+   (fn [] (swap! game-state advance-time))
+   0 200
+   TimeUnit/MILLISECONDS))
 
 (defn tailored-game-state [current-game-state player-id]
   (let [players (:players current-game-state)
