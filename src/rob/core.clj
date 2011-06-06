@@ -103,7 +103,7 @@
 (defn tailored-game-state [current-game-state player-id]
   (let [players (:players current-game-state)
 	me (get players player-id)
-	others (dissoc players player-id)]
+	others (vals (dissoc players player-id))]
     (assoc
 	(dissoc current-game-state :players)
       :me me, :others others)))
