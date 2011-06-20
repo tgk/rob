@@ -29,6 +29,8 @@ main = () ->
 jQuery ->
 	$('.actions li').live 'mousedown', (ev) ->
 		i = $(@).data('index')
-		$.post("play-card/#{i}")
+		$.post "play-card/#{i}"
+	$(window).bind 'keydown', (ev) ->
+		$.post "play-card/#{ev.keyCode - 49}"
 	setInterval main, 100
 

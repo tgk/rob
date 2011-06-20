@@ -45,6 +45,9 @@
       i = $(this).data('index');
       return $.post("play-card/" + i);
     });
+    $(window).bind('keydown', function(ev) {
+      return $.post("play-card/" + (ev.keyCode - 49));
+    });
     return setInterval(main, 100);
   });
 }).call(this);
