@@ -133,7 +133,8 @@
 	  me (get players player-id)
 	  others (vals (dissoc players player-id))
 	  winner-info (if (contains? current-game-state :winners)
-			(if (contains? (:winners current-game-state me))
+			(if (contains?
+			     (set (:winners current-game-state)) player-id)
 			  :you-won, :you-lost)
 			:undecided)]
       (json-response
