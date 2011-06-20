@@ -86,20 +86,33 @@
   (< (.nextFloat random) p))
 (defn increment-card-time [card] (assoc card :time (inc (:time card))))
 (defn stocastically-increment-card-time [card]
-  (if (probability-lower-than (/ 1 (:time card)))
+  (if (probability-lower-than (/ 1 (+ 5 (:time card))))
     (increment-card-time card)
     card))
 (defn increment-deck-time [player]
   (assoc player :deck
 	 (map stocastically-increment-card-time (:deck player))))
-    
+
+(defn player-in-goal [goal-x goal-y [name {x :x, y :y}]]
+  (and (= goal-x x) (= goal-y y)))
+(defn players-in-goal [current-game-state]
+  (let [[goal-x goal-y] (:goal current-game-state)]
+    (filter (partial player-in-goal goal-x goal-y)
+	    (:players current-game-state))))
+
 (defn advance-time [current-game-state]
-  (let [players (:players current-game-state)
-	players (fmap advance-time-for-player players)
-	players (fmap increment-deck-time players)]
-    (assoc current-game-state
-      :players players
-      :last-updated (System/currentTimeMillis))))
+  (if (contains? current-game-state :winners)
+    current-game-state
+    (let [players (:players current-game-state)
+	  players (fmap advance-time-for-player players)
+	  players (fmap increment-deck-time players)
+	  players-who-won (players-in-goal current-game-state)
+	  new-state (assoc current-game-state
+		      :players players
+		      :last-updated (System/currentTimeMillis))]
+      (if (seq players-who-won)
+	(assoc new-state :winners (map first players-who-won))
+	new-state))))
 
 (def thread-pool (Executors/newScheduledThreadPool 4))
 (def scheduler
