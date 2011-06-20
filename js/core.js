@@ -10,13 +10,13 @@
   labels = {
     fire: "!",
     "turn-left": "&#8634",
-    "turn-right": "&#8634",
+    "turn-right": "&#8635",
     forward: "&uarr;",
     backward: "&darr;",
     "fast-forward": "&#8648"
   };
-  $.fn.addPlayer = function(data) {
-    $('<div class="player"><div style="-webkit-transform: rotate(' + angle[data.direction] + 'deg); ">&uarr;</div></div>').css({
+  $.fn.addPlayer = function(data, clazz) {
+    $('<div class="player"><div style="-webkit-transform: rotate(' + angle[data.direction] + 'deg); ">&uarr;</div></div>').addClass(clazz).css({
       bottom: SZ * data.y,
       left: SZ * data.x
     }).appendTo(this);
@@ -25,9 +25,9 @@
   main = function() {
     return $.get('game-state', function(state) {
       var actions, board, queue;
-      board = $('.board').empty().addPlayer(state.me);
+      board = $('.board').empty().addPlayer(state.me, "me");
       $(state.others).each(function() {
-        return board.addPlayer(this);
+        return board.addPlayer(this, "other");
       });
       actions = $('.actions').empty();
       $(state.me.deck).each(function(i) {

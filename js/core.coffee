@@ -1,9 +1,10 @@
 SZ = 20
 angle = north: 0, east: 90, south: 180, west: 270
-labels = fire: "!", "turn-left": "&#8634", "turn-right": "&#8634", forward: "&uarr;", backward: "&darr;", "fast-forward": "&#8648"
+labels = fire: "!", "turn-left": "&#8634", "turn-right": "&#8635", forward: "&uarr;", backward: "&darr;", "fast-forward": "&#8648"
 
-$.fn.addPlayer = (data) ->
+$.fn.addPlayer = (data, clazz) ->
 	$('<div class="player"><div style="-webkit-transform: rotate('+angle[data.direction]+'deg); ">&uarr;</div></div>')
+		.addClass(clazz)
 		.css
 			bottom: SZ * data.y
 			left: SZ * data.x
@@ -12,8 +13,8 @@ $.fn.addPlayer = (data) ->
 
 main = () ->
 	$.get 'game-state', (state) ->
-		board = $('.board').empty().addPlayer(state.me)
-		$(state.others).each -> board.addPlayer(@)
+		board = $('.board').empty().addPlayer(state.me, "me")
+		$(state.others).each -> board.addPlayer(@, "other")
 		actions = $('.actions').empty()
 		$(state.me.deck).each (i) ->
 			$('<li/>').html(labels[@type] || @type)
