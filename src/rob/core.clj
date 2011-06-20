@@ -110,6 +110,11 @@
        0 200
        TimeUnit/MILLISECONDS)))
 
+(defn json-response [data & [status]]
+  {:status (or status 200)
+   :headers {"Content-Type" "application/json"}
+   :body (json/generate-string data)})
+
 (defn tailored-game-state [current-game-state player-id]
   (if (contains? (:players current-game-state) player-id)
     (let [players (:players current-game-state)
@@ -122,11 +127,6 @@
     nil))
 
 ; Web-server magic
-
-(defn json-response [data & [status]]
-  {:status (or status 200)
-   :headers {"Content-Type" "application/json"}
-   :body (json/generate-string data)})
 
 (defn play-card-on-game-state [current-game-state player-id card-number]
   (if (and (contains? (:players current-game-state) player-id)
