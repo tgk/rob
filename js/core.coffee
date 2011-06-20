@@ -18,6 +18,7 @@ main = () ->
 		actions = $('.actions').empty()
 		$(state.me.deck).each (i) ->
 			$('<li/>').html(labels[@type] || @type)
+				.css('background-color': "hsl(#{100 - 4 * @time}, 100%, 75%)")
 				.append("<span class='badge'>#{@time}</span>")
 				.data('index', i)
 				.appendTo(actions)
@@ -25,6 +26,7 @@ main = () ->
 		$(state.me.queue).each ->
 			$('<li/>').html(labels[@type] || @type)
 				.append("<span class='badge'>#{@time}</span>")
+				.css('background-color': "hsl(#{100 - 4 * @time}, 100%, 75%)")
 				.appendTo(queue)
 
 jQuery ->

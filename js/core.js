@@ -31,11 +31,15 @@
       });
       actions = $('.actions').empty();
       $(state.me.deck).each(function(i) {
-        return $('<li/>').html(labels[this.type] || this.type).append("<span class='badge'>" + this.time + "</span>").data('index', i).appendTo(actions);
+        return $('<li/>').html(labels[this.type] || this.type).css({
+          'background-color': "hsl(" + (100 - 4 * this.time) + ", 100%, 75%)"
+        }).append("<span class='badge'>" + this.time + "</span>").data('index', i).appendTo(actions);
       });
       queue = $('.queue').empty();
       return $(state.me.queue).each(function() {
-        return $('<li/>').html(labels[this.type] || this.type).append("<span class='badge'>" + this.time + "</span>").appendTo(queue);
+        return $('<li/>').html(labels[this.type] || this.type).append("<span class='badge'>" + this.time + "</span>").css({
+          'background-color': "hsl(" + (100 - 4 * this.time) + ", 100%, 75%)"
+        }).appendTo(queue);
       });
     });
   };
