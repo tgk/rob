@@ -13,7 +13,7 @@
 
 (def random (Random.))
 (defn sample [coll] (nth coll (.nextInt random (count coll))))
-(defn make-card [type] {:type type, :time 20})
+(defn make-card [type] {:type type, :time 1})
 (def cards (map make-card [:forward :backward :turn-left :turn-right :fast-forward :fire]))
 (defn random-deck [] (for [i (range 5)] (sample cards)))
 (defn initial-player [x y]
@@ -111,12 +111,15 @@
        TimeUnit/MILLISECONDS)))
 
 (defn tailored-game-state [current-game-state player-id]
-  (let [players (:players current-game-state)
-	me (get players player-id)
-	others (vals (dissoc players player-id))]
-    (assoc
-	(dissoc current-game-state :players)
-      :me me, :others others)))
+  (if (contains? (:players current-game-state) player-id)
+    (let [players (:players current-game-state)
+	  me (get players player-id)
+	  others (vals (dissoc players player-id))]
+      (json-response
+       (assoc
+	   (dissoc current-game-state :players)
+	 :me me, :others others)))
+    nil))
 
 ; Web-server magic
 
@@ -125,9 +128,11 @@
    :headers {"Content-Type" "application/json"}
    :body (json/generate-string data)})
 
-(defn play-card-on-game-state [player-id card-number]
-  (swap! game-state play-card player-id card-number)
-  {:status "success"})
+(defn play-card-on-game-state [current-game-state player-id card-number]
+  (if (and (contains? (:players current-game-state) player-id)
+	   (<= 0 card-number 4))
+      (play-card current-game-state player-id card-number)
+      current-game-state))
 
 (defroutes handler
   (GET "/" [] (redirect "/add-player"))
@@ -139,10 +144,14 @@
        (redirect (format "/game/%s/" (add-uuid-player-to-game-state))))
   (GET "/game/:player-id/" [] (slurp "index.html"))
   (GET "/game/:player-id/game-state" [player-id]
-       (json-response (tailored-game-state @game-state player-id)))
+       (tailored-game-state @game-state player-id))
   (POST "/game/:player-id/play-card/:card-number" [player-id card-number]
-	(json-response
-	 (play-card-on-game-state player-id (Integer/parseInt card-number)))))
+	(do
+	  (swap! game-state
+		 play-card-on-game-state
+		 player-id
+		 (Integer/parseInt card-number))
+	  (json-response {:status :ok}))))
 
 (def app
      (-> handler
