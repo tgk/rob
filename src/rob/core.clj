@@ -135,7 +135,7 @@
 	  winner-info (if (contains? current-game-state :winners)
 			(if (contains?
 			     (set (:winners current-game-state)) player-id)
-			  :you-won, :you-lost)
+			  :youwon, :youlost)
 			:undecided)]
       (json-response
        (assoc
