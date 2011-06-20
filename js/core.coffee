@@ -22,6 +22,8 @@ $.fn.addGoal = (data) ->
 
 main = () ->
 	$.get 'game-state', (state) ->
+		if state.winnerinfo != 'undecided'
+			$('.result').html("<h1>#{state.winnerinfo}</h1>").css('display', 'block')
 		board = $('.board').empty().addPlayer(state.me, "me")
 		board.addGoal state.goal
 		$(state.others).each -> board.addPlayer(@, "other")
@@ -46,4 +48,3 @@ jQuery ->
 	$(window).bind 'keydown', (ev) ->
 		$.post "play-card/#{ev.keyCode - 49}"
 	setInterval main, 100
-

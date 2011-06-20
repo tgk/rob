@@ -32,6 +32,9 @@
   main = function() {
     return $.get('game-state', function(state) {
       var actions, board, queue;
+      if (state.winnerinfo !== 'undecided') {
+        $('.result').html("<h1>" + state.winnerinfo + "</h1>").css('display', 'block');
+      }
       board = $('.board').empty().addPlayer(state.me, "me");
       board.addGoal(state.goal);
       $(state.others).each(function() {
