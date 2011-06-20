@@ -22,10 +22,18 @@
     }).appendTo(this);
     return this;
   };
+  $.fn.addGoal = function(data) {
+    $("<div class='goal' />").html('&hearts;').css({
+      bottom: SZ * data.y,
+      left: SZ * data.x
+    }).appendTo(this);
+    return this;
+  };
   main = function() {
     return $.get('game-state', function(state) {
       var actions, board, queue;
       board = $('.board').empty().addPlayer(state.me, "me");
+      board.addGoal(state.goal);
       $(state.others).each(function() {
         return board.addPlayer(this, "other");
       });

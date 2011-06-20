@@ -11,9 +11,19 @@ $.fn.addPlayer = (data, clazz) ->
 		.appendTo(@)
 	return @
 
+$.fn.addGoal = (data) ->
+	$("<div class='goal' />")
+		.html('&hearts;')
+		.css
+			bottom: SZ * data.y
+			left: SZ * data.x
+		.appendTo(@)
+	return @
+
 main = () ->
 	$.get 'game-state', (state) ->
 		board = $('.board').empty().addPlayer(state.me, "me")
+		board.addGoal state.goal
 		$(state.others).each -> board.addPlayer(@, "other")
 		actions = $('.actions').empty()
 		$(state.me.deck).each (i) ->
