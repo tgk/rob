@@ -82,10 +82,16 @@
 	  (assoc player-state
 	    :queue (cons (assoc top-card :time (dec top-card-time)) (rest queue))))))))
 
+(defn probability-lower-than [p]
+  (< (.nextFloat random) p))
 (defn increment-card-time [card] (assoc card :time (inc (:time card))))
+(defn stocastically-increment-card-time [card]
+  (if (probability-lower-than (/ 1 (:time card)))
+    (increment-card-time card)
+    card))
 (defn increment-deck-time [player]
   (assoc player :deck
-	 (map increment-card-time (:deck player))))
+	 (map stocastically-increment-card-time (:deck player))))
     
 (defn advance-time [current-game-state]
   (let [players (:players current-game-state)
@@ -97,11 +103,12 @@
 
 (def thread-pool (Executors/newScheduledThreadPool 4))
 (def scheduler
-  (.scheduleAtFixedRate
-   thread-pool
-   (fn [] (swap! game-state advance-time))
-   0 200
-   TimeUnit/MILLISECONDS))
+  (do (println "Defining scheduler")
+      (.scheduleAtFixedRate
+       thread-pool
+       (fn [] (swap! game-state advance-time))
+       0 200
+       TimeUnit/MILLISECONDS)))
 
 (defn tailored-game-state [current-game-state player-id]
   (let [players (:players current-game-state)
@@ -125,7 +132,9 @@
 (defroutes handler
   (GET "/" [] (redirect "/add-player"))
   (GET "/js/core.js" [] (slurp "js/core.js"))
-  (GET "/restart" [] (reset! game-state (random-game-state)))
+  (GET "/restart" []
+       (do (reset! game-state (random-game-state))
+	   (redirect "/")))
   (GET "/add-player" []
        (redirect (format "/game/%s/" (add-uuid-player-to-game-state))))
   (GET "/game/:player-id/" [] (slurp "index.html"))
