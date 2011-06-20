@@ -135,12 +135,12 @@
 	  winner-info (if (contains? current-game-state :winners)
 			(if (contains?
 			     (set (:winners current-game-state)) player-id)
-			  :youwon, :youlost)
+			  :you-won, :you-lost)
 			:undecided)]
       (json-response
        (assoc
 	   (dissoc current-game-state :players)
-	 :me me, :others others, :winner-info winner-info)))
+	 :me me, :others others, :winnerinfo winner-info)))
     nil))
 
 ; Web-server magic
