@@ -18,7 +18,7 @@
 (defn random-deck [] (for [i (range 5)] (sample cards)))
 (defn initial-player [x y]
   {:x x, :y y, :direction :north, :queue [], :deck (random-deck)})
-(defn random-game-state [] {:players {} :goal [6 4]})
+(defn random-game-state [] {:players {} :goal {:x 6, :y 4}})
 
 (def game-state (atom (random-game-state)))
 
@@ -93,12 +93,11 @@
   (assoc player :deck
 	 (map stocastically-increment-card-time (:deck player))))
 
-(defn player-in-goal [goal-x goal-y [name {x :x, y :y}]]
+(defn player-in-goal [{goal-x :x, goal-y :y} [name {x :x, y :y}]]
   (and (= goal-x x) (= goal-y y)))
 (defn players-in-goal [current-game-state]
-  (let [[goal-x goal-y] (:goal current-game-state)]
-    (filter (partial player-in-goal goal-x goal-y)
-	    (:players current-game-state))))
+  (filter (partial player-in-goal (:goal current-game-state))
+	  (:players current-game-state)))
 
 (defn advance-time [current-game-state]
   (if (contains? current-game-state :winners)
@@ -132,11 +131,15 @@
   (if (contains? (:players current-game-state) player-id)
     (let [players (:players current-game-state)
 	  me (get players player-id)
-	  others (vals (dissoc players player-id))]
+	  others (vals (dissoc players player-id))
+	  winner-info (if (contains? current-game-state :winners)
+			(if (contains? (:winners current-game-state me))
+			  :you-won, :you-lost)
+			:undecided)]
       (json-response
        (assoc
 	   (dissoc current-game-state :players)
-	 :me me, :others others)))
+	 :me me, :others others, :winner-info winner-info)))
     nil))
 
 ; Web-server magic
