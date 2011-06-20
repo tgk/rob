@@ -29,6 +29,7 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 .me {
 	background-color: #ccf;;
+	z-index; 1;
 }
 
 .board {
@@ -90,11 +91,25 @@ ul, li {
 	padding: 2px;
 	color: #999;
 }
+
+.result {
+	position: absolute;
+	display: none;
+	font-size: 100pt;
+	background-color: pink;
+	padding: 20px;
+	z-index: 100;
+	text-transform: capitalize;
+	left: 20px;
+	top: 20px;
+	border: 5px solid black;
+}
 		</style>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
 		<script type="text/javascript" src="/js/core.js"></script>
 	</head>
 	<body>
+		<div class="result"></div>
 		<div>rob <a href="/restart">restart</a></div>
 		<div class="board"></div>
 		<ul class="queue">
