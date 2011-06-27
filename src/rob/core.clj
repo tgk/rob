@@ -66,20 +66,31 @@
   (-> player-state
       (update-in [:x] clamp 0 default-board-width)
       (update-in [:y] clamp 0 default-board-height)))
-	
+
+(defn guarded-move [player-state walls delta-x delta-y]
+  (let [new-x (+ (:x player-state) delta-x)
+	new-y (+ (:y player-state) delta-y)]
+    (if (contains? {:x new-x, :y new-y} walls)
+      player-state
+      (assoc player-state :x new-x :y new-y))))
+
 (defn move [steps]
-  (fn [player-state]
-    (case (:direction player-state)
-	  :north (assoc player-state :y (+ (:y player-state) steps))
-	  :south (assoc player-state :y (- (:y player-state) steps))
-	  :east (assoc player-state :x (+ (:x player-state) steps))
-	  :west (assoc player-state :x (- (:x player-state) steps)))))
+  (if (= 0 steps)
+    (fn [player-state _] player-state)
+    (fn [player-state walls]
+      ((move (dec steps))
+       (case (:direction player-state)
+	     :north (guarded-move player-state walls  0  1)
+	     :south (guarded-move player-state walls  0 -1)
+	     :east  (guarded-move player-state walls  1  0)
+	     :west  (guarded-move player-state walls -1  0))
+       walls))))
 
 (def clockwise-to {:north :east, :east :south, :south :west, :west :north})
 (defn turn-clockwise [player-state]
   (assoc player-state :direction (clockwise-to (:direction player-state))))
 (defn turn [times]
-  (fn [player-state] (nth (iterate turn-clockwise player-state) times)))
+  (fn [player-state _] (nth (iterate turn-clockwise player-state) times)))
 
 (def player-actions
      {:forward (move 1)
@@ -89,7 +100,7 @@
       :fast-forward (move 2)
       :fire identity})
 
-(defn advance-time-for-player [player-state]
+(defn advance-time-for-player [player-state walls]
   (let [queue (:queue player-state)]
     (if (empty? queue)
       player-state
@@ -98,7 +109,7 @@
 	(cap-player-to-board
 	 (if (= 0 top-card-time)
 	   (assoc
-	       ((player-actions (:type top-card)) player-state)
+	       ((player-actions (:type top-card)) player-state walls)
 	     :queue (rest queue))
 	   (assoc player-state
 	     :queue
@@ -126,7 +137,9 @@
   (if (contains? current-game-state :winners)
     current-game-state
     (let [players (:players current-game-state)
-	  players (fmap advance-time-for-player players)
+	  players (fmap (fn [player-state]
+			  (advance-time-for-player player-state (:walls current-game-state)))
+			players)
 	  players (fmap increment-deck-time players)
 	  players-who-won (players-in-goal current-game-state)
 	  new-state (assoc current-game-state
@@ -163,7 +176,8 @@
       (json-response
        (assoc
 	   (dissoc current-game-state :players)
-	 :me me, :others others, :winnerinfo winner-info)))
+	 :me me, :others others, :winnerinfo winner-info,
+	 :walls (-> current-game-state :walls seq))))
     nil))
 
 ; Web-server magic
