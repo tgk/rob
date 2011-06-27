@@ -11,6 +11,9 @@
 
 ; Game state and changer
 
+(def default-board-width 25)
+(def default-board-height 25)
+
 (def random (Random.))
 (defn sample [coll] (nth coll (.nextInt random (count coll))))
 (defn make-card [type] {:type type, :time 1})
@@ -18,7 +21,11 @@
 (defn random-deck [] (for [i (range 5)] (sample cards)))
 (defn initial-player [x y]
   {:x x, :y y, :direction :north, :queue [], :deck (random-deck)})
-(defn random-game-state [] {:players {} :goal {:x 6, :y 4}})
+(defn random-game-state []
+  {:players {}
+   :goal {:x 6, :y 4}
+   :board-width default-board-width
+   :board-height default-board-height})
 
 (def game-state (atom (random-game-state)))
 
@@ -47,6 +54,14 @@
 
 ; Advancing time
 
+(defn clamp [val low high]
+  (-> val (max low) (min high)))
+
+(defn cap-player-to-board [player-state]
+  (-> player-state
+      (update-in [:x] clamp 0 default-board-width)
+      (update-in [:y] clamp 0 default-board-height)))
+	
 (defn move [steps]
   (fn [player-state]
     (case (:direction player-state)
@@ -75,12 +90,15 @@
       player-state
       (let [top-card (first queue)
 	    top-card-time (:time top-card)]
-	(if (= 0 top-card-time)
-	  (assoc
-	      ((player-actions (:type top-card)) player-state)
-	    :queue (rest queue))
-	  (assoc player-state
-	    :queue (cons (assoc top-card :time (dec top-card-time)) (rest queue))))))))
+	(cap-player-to-board
+	 (if (= 0 top-card-time)
+	   (assoc
+	       ((player-actions (:type top-card)) player-state)
+	     :queue (rest queue))
+	   (assoc player-state
+	     :queue
+	     (cons (assoc top-card :time (dec top-card-time))
+		   (rest queue)))))))))
 
 (defn probability-lower-than [p]
   (< (.nextFloat random) p))
