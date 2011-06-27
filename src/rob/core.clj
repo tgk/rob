@@ -1,4 +1,5 @@
 (ns rob.core
+  (:use clojure.set)
   (:use compojure.core)
   (:use ring.util.response
 	ring.middleware.json-params
@@ -21,9 +22,13 @@
 (defn random-deck [] (for [i (range 5)] (sample cards)))
 (defn initial-player [x y]
   {:x x, :y y, :direction :north, :queue [], :deck (random-deck)})
+(defn random-wall [] {:x (.nextInt random default-board-width) :y (.nextInt random default-board-height)})
+(defn random-walls [max-n goal]
+  (difference (set (for [i (range max-n)] (random-wall))) #{goal}))
 (defn random-game-state []
   {:players {}
-   :goal {:x 6, :y 4}
+   :goal {:x 12, :y 12}
+   :walls (random-walls 50 {:x 12, :y 12})
    :board-width default-board-width
    :board-height default-board-height})
 
